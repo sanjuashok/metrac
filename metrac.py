@@ -8,10 +8,13 @@ Usage:
 import json
 import datetime
 import requests
+import weight_utils
 from google.oauth2 import service_account
 from google.auth.transport.requests import AuthorizedSession
 from docopt import docopt
 
+# height constant, in inches
+HEIGHT = 69
 arguments = {}
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='metrac 0.0')
@@ -26,12 +29,20 @@ if arguments['add']:
     # get today's key
     key = str(now.year) + str(now.month).zfill(2) + str(now.day).zfill(2)
 
+    # do some weight calculations
+    weight = float(arguments['<weight>'])
+    bmi =  weight_utils.get_bmi(weight, float(HEIGHT))
+    bmr =  weight_utils.get_bmr(weight, float(HEIGHT))
+    tdee = weight_utils.get_tdee(float(bmr))
     # format the json we're sending it
     data = {}
     details = {}
 
     details['weight'] = arguments['<weight>']
     details['message'] = arguments['<message>']
+    details['bmi'] = bmi
+    details['bmr'] = bmr
+    details['tdee'] = tdee
 
     data[key] = details;
     json_data = json.dumps(data);
